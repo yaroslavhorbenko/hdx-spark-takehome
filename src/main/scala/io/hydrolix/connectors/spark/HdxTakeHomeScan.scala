@@ -36,6 +36,5 @@ class HdxTakeHomeScan extends Scan with Batch {
       }
   }
 
-  // Implement the toBatch method to return this instance
   override def toBatch: Batch = this
 }
