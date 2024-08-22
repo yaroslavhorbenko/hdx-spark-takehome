@@ -30,7 +30,7 @@ Implement a custom Spark DataSource V2 reader for a `.log` file format with dire
   - **Row Parsing:** Correctly parse each line into a Row object with an integer (epoch timestamp) and a string.
 
 ### Hints
-- Review the CSV DataSource V2 implementation in the Spark GitHub repository.
+- Review the [CSV DataSource V2 implementation](https://github.com/apache/spark/tree/v3.5.2/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/csv) in the Spark GitHub repository.
 
 ## Part 2: Performance Optimization with String Search
 
@@ -53,7 +53,7 @@ Now that you have a working DataSource V2 reader, let’s consider how to optimi
 ### Hints
 - Think about how databases or search engines optimize string searches using tools like regular expressions. Consider how you might implement a similar approach within your DataSource V2 reader to handle `LIKE` operations more efficiently.
 - Review Spark’s support for filter pushdown and how it can be used to implement this string search optimization in your custom data source.
-- For inspiration, you may want to review the `DataSourceV2Suite.scala` file, which demonstrates predicate pushdown and other optimizations in the context of DataSource V2.
+- For inspiration, you may want to review the [`DataSourceV2Suite.scala` file](https://github.com/apache/spark/blob/v3.5.2/sql/core/src/test/scala/org/apache/spark/sql/connector/DataSourceV2Suite.scala#L763), which demonstrates predicate pushdown and other optimizations in the context of DataSource V2.
 
 ## Deliverables
 - The complete source code for your custom DataSource V2 reader.
@@ -62,7 +62,6 @@ Now that you have a working DataSource V2 reader, let’s consider how to optimi
 
 ## Submission
 - Package your code into a zip file or upload it to a GitHub repository and share the link.
-
 
 # Getting Started
 
