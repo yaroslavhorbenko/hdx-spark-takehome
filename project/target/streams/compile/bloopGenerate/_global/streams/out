@@ -1,0 +1,4 @@
+[debug] [spark-takehome-build] Classpath dependencies List()
+[debug] [spark-takehome-build] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'spark-takehome-build' to '/home/ubuntu/spark-takehome/project/.bloop/spark-takehome-build.json'
+[success] Generated .bloop/spark-takehome-build.json
