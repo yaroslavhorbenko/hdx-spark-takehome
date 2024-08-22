@@ -24,20 +24,22 @@ spark.sql("SELECT COUNT(*) FROM hdx.takehome.logs").show(false)
 
 ## 5. Implement Your Solution
 
-Add your Scala code files to the src/ directory in your local repository.
-Implement your custom DataSource V2 reader as per the assignment requirements.
+Implement your custom DataSource V2 reader as per the assignment requirements.\
+Add your Scala code files to the `src` directory in your local repository.
 
 ## 6. Run and Test Your Implementation
 
 `docker run -it --rm fedrod/hdx-spark-takehome:latest spark-shell`
 
-This will run an entrypoint into the Spark shell. In the shell, you can test your implementation:
-`spark.sql("SELECT * FROM hdx.takehome.logs").show(false)`
+This will run an entrypoint into the Spark shell.\
+
+In the shell, you can test your implementation:
+`spark.sql("SELECT * FROM hdx.takehome.logs").show(false)`\
 
 To enter docker container in a bash shell, simply run
 `docker run -it --rm fedrod/hdx-spark-takehome:latest`
 
 ## 7. Submit Your Solution
 
-Push your changes to your fork
-Create a pull request to the original repository
+Push your changes to your fork.\
+Create a pull request to the original repository.
