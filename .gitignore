@@ -1,0 +1,53 @@
+# Ignore everything in project directory
+/project/*
+
+# But keep these files
+!/project/build.properties
+!/project/plugins.sbt
+
+# Optionally, if you want to keep the directory structure
+!/project/project/
+/project/project/*
+!/project/project/build.properties
+!/project/project/plugins.sbt
+
+
+project/metals.sbt
+project/project/metals.sbt
+
+.scala-build/
+
+# Ignore any log files
+*.log
+
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### IntelliJ IDEA ###
+.idea/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+.bsp/
+
+### Spark
+**/metastore_db
+**/derby.log
+
+### Turbine
+**/turbine.log
+
+# Metals VSCode plugin directories and files
+.metals/
+.bloop/
+*.semanticdb
+metals.sbt
+metals.lock.db
+metals.log
+metals.mv.db
