@@ -57,11 +57,9 @@ Now that you have a working DataSource V2 reader, let’s consider how to optimi
 
 ## Deliverables
 - The complete source code for your custom DataSource V2 reader.
-- A simple Spark application demonstrating the reader in action with a parent directory containing multiple subdirectories, each with a `.log` file.
-- A `README` file with detailed instructions on how to compile and run the code, along with your explanation.
+- A simple Spark SQL query against the hdx.takehome.logs table demonstrating the reader in action, reading from a parent directory containing multiple subdirectories, each with a `.log` file.
+- A `README` file
 
-## Submission
-- Package your code into a zip file or upload it to a GitHub repository and share the link.
 
 # Getting Started
 
@@ -73,6 +71,10 @@ Click the ‘Fork’ button at the top right of this page to create your own cop
 
 ```
 git clone https://github.com/hydrolix/hdx-spark-takehome.git
+```
+
+
+```
 cd hdx-spark-takehome
 ```
 
@@ -84,6 +86,9 @@ cd hdx-spark-takehome
 
 ```
 docker run -it --rm fedrod/hdx-spark-takehome:latest spark-shell
+```
+
+```
 spark.sql("SELECT COUNT(*) FROM hdx.takehome.logs").show(false)
 ```
 
@@ -94,15 +99,22 @@ Add your Scala code files to the `src` directory in your local repository.
 
 ## 6. Run and Test Your Implementation
 
-`docker run -it --rm fedrod/hdx-spark-takehome:latest spark-shell`
+```
+docker run -it --rm fedrod/hdx-spark-takehome:latest spark-shell
+```
 
 This will run an entrypoint into the Spark shell.
 
 In the shell, you can test your implementation:
-`spark.sql("SELECT * FROM hdx.takehome.logs").show(false)`
+
+```
+scala> spark.sql("SELECT * FROM hdx.takehome.logs").show(false)
+```
 
 To enter docker container in a bash shell, simply run
-`docker run -it --rm fedrod/hdx-spark-takehome:latest`
+```
+docker run -it --rm fedrod/hdx-spark-takehome:latest
+```
 
 ## 7. Submit Your Solution
 
