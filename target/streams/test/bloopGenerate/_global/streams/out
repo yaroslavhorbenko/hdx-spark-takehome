@@ -1,4 +1,0 @@
-[debug] [spark-takehome-test] Classpath dependencies List()
-[debug] [spark-takehome-test] Dependencies from configurations List(spark-takehome)
-[debug] Bloop wrote the configuration of project 'spark-takehome-test' to '/home/ubuntu/spark-takehome/.bloop/spark-takehome-test.json'
-[success] Generated .bloop/spark-takehome-test.json

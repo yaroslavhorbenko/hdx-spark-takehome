@@ -9,7 +9,7 @@
 FROM sbtscala/scala-sbt:eclipse-temurin-17.0.4_1.7.1_3.2.0
 
 # Set environment variables
-ENV SPARK_VERSION=3.5.2
+ENV SPARK_VERSION=3.5.3
 ENV HADOOP_VERSION=3
 ENV SPARK_HOME=/opt/spark
 ENV PATH=$SPARK_HOME/bin:$PATH
@@ -40,6 +40,7 @@ WORKDIR /home/sbtuser/app
 COPY --chown=sbtuser:sbtuser build.sbt .
 COPY --chown=sbtuser:sbtuser project project
 COPY --chown=sbtuser:sbtuser src src
+COPY --chown=sbtuser:sbtuser data data
 
 # Switch back to sbtuser
 USER sbtuser

@@ -17,8 +17,6 @@
 # Ignore Scala build directory
 .scala-build/
 
-# Ignore log files
-*.log
 
 # Ignore target directories
 target/

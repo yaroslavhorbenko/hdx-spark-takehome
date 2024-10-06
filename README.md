@@ -1,123 +1,69 @@
-# Take-Home Assignment: Implement a Custom DataSource V2 Reader with Directory-Based Partitioning and Optimized String Searching
+# Custom DataSource V2 Reader with Directory-Based Partitioning and Optimized String Searching
 
 ## Overview
-In this assignment, you will implement a custom Spark DataSource V2 reader for a custom file format (`.log`) that includes directory-based partitioning. You will also enhance the reader to support filter pushdown for string searches. This assignment will assess your ability to understand Spark’s DataSource V2 implementation.
+Spark DataSource V2 reader for a custom file format (`.log`) has been implemented in this repo.
+It has built-in support for directory-based partitioning and filter push-down for string searches.
 
-## Part 1: Basic Implementation
+## General Approach
+1. **Directory-Based Partitioning and Parsing:**
+    - **Directory Scan**. Reader treats each subdirectory containing a `.log` file as a separate partition. 
+    in the case subdirectory is empty or doesn't have `.log` file it's ignored.
+    - **Parsing**. Each `partition.log` file within the directories is read line by line, and each line is parsed into a Row object with two fields: an integer (epoch timestamp) and a string. 
+    The values on each line should be separated by a pipe (`|`).
+    Parsing logic is implemented using regexp, lines with incorrect format are simply ignored with warning message produced. 
+    Such approach allows to parse as much valid rows as possible.
+    Line iterator is used in partition reader, it allows process even big files without any potential memory issues.  
 
-### Objective
-Implement a custom Spark DataSource V2 reader for a `.log` file format with directory-based partitioning. The `.log` file format is simple, where each line contains a record of two values separated by a pipe (`|`): an integer (representing an epoch timestamp) and a string.
+2. **String Search Optimization:**
+    - **Filters push-down**  feature allows us to perform highly efficient filtering on data-source level before data is even loaded into Spark.
+    Particularly for `LIKE` operation on `data` column we have used push down to directly filter out values using Scala’s regular expressions.
 
-### Tasks
+## Code overview
+Code base consist of several packages. Let's review the most important: 
+1. Test application lives here `io.hydrolix.connectors.spark.TakeHomeSimpleApp`. It creates local spark instance and performs `LIKE` query under table from our catalog
+2. There are two classes in root connector's package `io.hydrolix.connectors.spark`, those are `HdxTakeHomeCatalog` and `HdxTakeHomeTable`. 
+Catalog changes include config parameter support for data folder, it better than simply hardcoded it. Also partition directories scan is performed there. 
+Table implementation hasn't been changed so much, just partition dirs were added into constructor and propagated to `PushDownScanBuilder` class instance
+3. Utils package `io.hydrolix.connectors.spark.utils` consist of FileUtils object which utilizes methods to scan directory tree and list files in directory
+4. Parse package `io.hydrolix.connectors.spark.parse` consist of parser for line from .log file. Parser returns `Option` value, so in the case line parsing has failed `None` is returned
+5. There are several files in the `io.hydrolix.connectors.spark.partition` package. `DataDirInputPartition` is just custom partition class with directory path added. 
+The `DataPartitionReaderFactory` creates separate partition instance for each directory. A lot of work happens in `DataDirPartitionReader` - iteration over file lines, parsing and filtering
+6. `PushDownScanBuilder` is the most interesting in `io.hydrolix.connectors.spark.scan` package. It specifies supported push down filters which are used later in `DataDirInputPartition` class
 
-1. **Implement a DataSource V2 Reader with Directory-Based Partitioning:**
-   - **Directory-Based Partitioning:** Your reader should treat each directory containing a `.log` file as a separate partition. For example, if there are three directories (`dir1`, `dir2`, `dir3`), each containing a file named `partition.log`, your reader should create three partitions, with each partition reading data from one of these directories.
-   - **Row Parsing:** Each `partition.log` file within the directories should be read line by line, and each line should be parsed into a Row object with two fields: an integer (epoch timestamp) and a string. The values on each line will be separated by a pipe (`|`), e.g., `1633024800|example_text`.
+## Getting Started
 
-2. **Test the Reader with Partitioned Data:**
-   - Create multiple directories (e.g., `dir1`, `dir2`, `dir3`), each containing a `.log` file named `partition.log` with a few lines of test data.
-   - Write a simple Spark application that uses your custom reader to load data from the directories.
-
-3. **Documentation:**
-   - Provide a `README` file with instructions on how to compile and run your solution.
-   - Include a short explanation (1-2 paragraphs) discussing your approach, how you handled directory-based partitioning, and any challenges you encountered.
-
-### Requirements
-- Implement the custom DataSource V2 reader using Spark’s DataSource V2 API.
-- Your reader must:
-  - **Support Directory-Based Partitioning:** Detect all directories containing `.log` files in a specified parent directory and create a separate partition for each directory.
-  - **Handle Multiple Partitions:** Ensure that each directory is processed independently, allowing Spark to read and process multiple directories in parallel.
-  - **Row Parsing:** Correctly parse each line into a Row object with an integer (epoch timestamp) and a string.
-
-### Hints
-- Review the [CSV DataSource V2 implementation](https://github.com/apache/spark/tree/v3.5.2/sql/core/src/main/scala/org/apache/spark/sql/execution/datasources/csv) in the Spark GitHub repository.
-
-## Part 2: Performance Optimization with String Search
-
-### Objective
-Now that you have a working DataSource V2 reader, let’s consider how to optimize it for specific types of operations. Imagine that your data source can be optimized to handle string searches very efficiently, by leveraging Scala’s regular expressions for filtering lines before they are returned to Spark.
-
-### Tasks
-
-1. **Optimize the DataSource V2 Reader with String Search:**
-   - **Enhanced Data Source Capabilities:** Suppose your data source is capable of performing highly efficient text searches directly within the files using Scala’s regular expressions. This allows you to perform `LIKE` operations or string filtering directly at the source level before the data is ingested by Spark.
-   - **Implementation:** Explore how you might modify your DataSource V2 reader to take advantage of this capability, particularly for `LIKE` operations in Spark queries. Implement the ability to push down these string search operations to the data source, using Scala's built-in regular expressions to filter the data.
-
-2. **Demonstrate the Optimization:**
-   - Modify your existing Spark application to perform a `LIKE` operation on the string field. Ensure that the filtering happens at the data source level by leveraging the optimized string search capability.
-   - The application should still demonstrate the directory-based partitioning, but now it should also showcase the efficiency gained by performing string searches before data is loaded into Spark.
-
-3. **Documentation:**
-   - Update your `README` file to include an explanation of how you approached this optimization, and what changes you made.
-
-### Hints
-- Think about how databases or search engines optimize string searches using tools like regular expressions. Consider how you might implement a similar approach within your DataSource V2 reader to handle `LIKE` operations more efficiently.
-- Review Spark’s support for filter pushdown and how it can be used to implement this string search optimization in your custom data source.
-- For inspiration, you may want to review the [`DataSourceV2Suite.scala` file](https://github.com/apache/spark/blob/v3.5.2/sql/core/src/test/scala/org/apache/spark/sql/connector/DataSourceV2Suite.scala#L763), which demonstrates predicate pushdown and other optimizations in the context of DataSource V2.
-
-## Deliverables
-- The complete source code for your custom DataSource V2 reader.
-- A simple Spark SQL query against the hdx.takehome.logs table demonstrating the reader in action, reading from a parent directory containing multiple subdirectories, each with a `.log` file.
-- A `README` file
-
-
-# Getting Started
-
-## 1. Fork this Repository
-
-Click the ‘Fork’ button at the top right of this page to create your own copy of this repository.
-
-## 2. Clone Your Fork
+### 1. Clone repo
 
 ```
-git clone https://github.com/hydrolix/hdx-spark-takehome.git
+git clone https://github.com/yaroslavhorbenko/hdx-spark-takehome.git
 ```
-
 
 ```
 cd hdx-spark-takehome
 ```
+Test data is placed into `data` directory in the root folder
 
-## 3. Pull the Pre-built Docker Image
+### 2. Run the application
+There are two ways of testing connector implementation:
+1. Run application using SBT.
+    Please make sure JDK 11+ and SBT are installed on you local machine
+    Simply run following command in root of cloned repo
+    ```
+    sbt run
+    ```
 
-`docker pull fedrod/hdx-spark-takehome:latest`
+2. Another way is to build and run a docker image, then run a query in the spark-shell
 
-## 4. Verify boilerplate is working
-
-```
-docker run -it --rm fedrod/hdx-spark-takehome:latest spark-shell
-```
-
-```
-spark.sql("SELECT COUNT(*) FROM hdx.takehome.logs").show(false)
-```
-
-## 5. Implement Your Solution
-
-Implement your custom DataSource V2 reader as per the assignment requirements.\
-Add your Scala code files to the `src` directory in your local repository.
-
-## 6. Run and Test Your Implementation
-
-```
-docker run -it --rm fedrod/hdx-spark-takehome:latest spark-shell
-```
-
-This will run an entrypoint into the Spark shell.
-
-In the shell, you can test your implementation:
-
-```
-scala> spark.sql("SELECT * FROM hdx.takehome.logs").show(false)
-```
-
-To enter docker container in a bash shell, simply run
-```
-docker run -it --rm fedrod/hdx-spark-takehome:latest
-```
-
-## 7. Submit Your Solution
-
-**Please make your repository private!**\
-Push your changes to your fork, and invite the contributors of this repo (@fedrod and @aggarwaa)
-
+    Please run set of commands to build a docker image locally:
+    ```
+    docker buildx create --name mybuilder --driver docker-container --use
+    docker buildx build --load -t hdx-spark-takehome:local .
+    ```
+    In order to run & enter docker container in a Spark shell, simply type:
+    ```
+    docker run -it --rm hdx-spark-takehome:local spark-shell
+    ```
+    Put the following command into Spark shell and see filtered data output
+    ```
+    spark.sql("SELECT * FROM hdx.takehome.logs where data LIKE '%partition2%'").show(false)
+    ```
